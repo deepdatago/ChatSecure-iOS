@@ -277,8 +277,10 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
                 }
             }
             
-            
-            self.httpFileUpload.requestSlot(fromService: service.jid, filename: filename, size: UInt(outData.count), contentType: contentType, completion: { (slot: XMPPSlot?, iq: XMPPIQ?, error: Error?) in
+            // [CRYPTO_TALK] encrypt data to be uploaded
+            let testKey = "63A78349DF7544768E0ECBCF3ACB6527";
+            let encryptedData = CryptoManager.encryptDataWithSymmetricKey(key: testKey as NSString, inputData: outData)!
+            self.httpFileUpload.requestSlot(fromService: service.jid, filename: filename, size: UInt(encryptedData.count), contentType: contentType, completion: { (slot: XMPPSlot?, iq: XMPPIQ?, error: Error?) in
                 guard let slot = slot else {
                     let outError = error ?? FileTransferError.serverError
                     DDLogError("\(service) failed to assign upload slot: \(outError)")
@@ -287,7 +289,7 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
                     }
                     return
                 }
-                self.sessionManager.upload(outData, to: slot.putURL, method: .put)
+                self.sessionManager.upload(encryptedData, to: slot.putURL, method: .put)
                     .validate()
                     .responseData(queue: self.callbackQueue) { response in
                         switch response.result {
@@ -700,7 +702,12 @@ extension FileTransferManager {
             DDLogError("Error downloading file \(error)")
             return
         }
-        guard var data = inData, let response = urlResponse, let url = response.url else {
+        
+        // [CRYPTO_TALK] decrypt received inData
+        let testKey = "63A78349DF7544768E0ECBCF3ACB6527"
+        let decryptedData = CryptoManager.decryptDataWithSymmetricKey(key: testKey as NSString, inputData: inData!)
+        
+        guard var data = decryptedData, let response = urlResponse, let url = response.url else {
             let error = FileTransferError.fileNotFound
             self.setError(error, onMessage: downloadMessage)
             DDLogError("No data or response \(error)")
