@@ -20,6 +20,10 @@ NS_ASSUME_NONNULL_BEGIN
 /** If true, do not allow editing of the form */
 @property (nonatomic) BOOL readOnly;
 
+// [CRYPTO_TALK] need to store the password and reuse it after validate the certificate when
+// first time register account.
+@property (nonatomic) NSString* tempPassword;
+
 /**
  * Creates a view for logging in with an existing local & remote account.
  *

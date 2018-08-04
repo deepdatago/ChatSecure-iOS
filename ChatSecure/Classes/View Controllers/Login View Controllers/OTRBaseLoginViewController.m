@@ -78,6 +78,211 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+- (void)populateAccount
+{
+    // [CRYPTO_TALK] just take password to create ethereum account
+    NSString *password = [[self.form formRowWithTag:kOTRXLFormPasswordTextFieldTag] value];
+    DeepDatagoManager *deepDatagoManager = [[DeepDatagoManager alloc] init];
+    NSString *post = [deepDatagoManager getRegisterRequestWithPassword:(password)];
+    if (post == nil) {
+        return;
+    }
+    
+    // NSString *post = [NSString stringWithFormat:@"Username=%@&Password=%@",@"username",@"password"];
+    NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+    NSString *postLength = [NSString stringWithFormat:@"%d",[postData length]];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+    [request setURL:[NSURL URLWithString:@"https://dev.deepdatago.com/service/accounts/register/"]];
+    [request setHTTPMethod:@"POST"];
+    [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
+    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    [request setHTTPBody:postData];
+    
+    NSURLResponse *response = nil;
+    NSError *error = nil;
+    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*) response;
+    long myCode = [httpResponse statusCode];
+    id responseJson = nil;
+    if (myCode == 200) {
+        responseJson = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        NSLog(@"%@",[responseJson objectForKey:@"xmppAccountPassword"]);
+        
+    }
+    
+    
+    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    /*
+     NSURLConnection *conn = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+     if(conn) {
+     NSLog(@"Connection Successful");
+     } else {
+     NSLog(@"Connection could not be made");
+     }
+     */
+    
+    {
+        /*
+         OTRXMPPAccount *account = nil;
+         if (!intoAccount) {
+         BOOL useTor = [[form formRowWithTag:kOTRXLFormUseTorTag].value boolValue];
+         OTRAccountType accountType = OTRAccountTypeJabber;
+         if (useTor) {
+         accountType = OTRAccountTypeXMPPTor;
+         }
+         account = [OTRAccount accountWithUsername:@"" accountType:accountType];
+         if (!account) {
+         return nil;
+         }
+         } else {
+         account = [intoAccount copy];
+         }
+         
+         NSString *nickname = [[form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
+         
+         XLFormRowDescriptor *usernameRow = [form formRowWithTag:kOTRXLFormUsernameTextFieldTag];
+         */
+        OTRXMPPAccount *account = nil;
+        OTRAccountType accountType = OTRAccountTypeJabber;
+        account = [OTRAccount accountWithUsername:@"" accountType:accountType];
+        
+        NSString *nickname = [[self.form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
+        
+        // XLFormRowDescriptor *usernameRow = [responseJson objectForKey:@"xmppAccountNumber"] + "@dev.deepdatago.com";
+        
+        NSString *jidNode = [responseJson objectForKey:@"xmppAccountNumber"]; // aka 'username' from username@example.com
+        NSString *jidDomain = @"dev.deepdatago.com";
+        account.rememberPassword = YES;
+        account.password = [responseJson objectForKey:@"xmppAccountPassword"];
+        self.tempPassword = [responseJson objectForKey:@"xmppAccountPassword"];
+        account.autologin = YES;
+        account.domain = @"dev.deepdatago.com";
+        account.port = 5222;
+        account.disableAutomaticURLFetching = NO;
+
+        int randomNumber = arc4random() % 99999;
+        account.resource = [NSString stringWithFormat:@"zom%d",randomNumber];
+
+        // account.resource = @"zom7893"; // [CRYPTO_TALK] TBD, a random number
+        
+        /*
+         if (![usernameRow isHidden]) {
+         NSArray *components = [usernameRow.value componentsSeparatedByString:@"@"];
+         if (components.count == 2) {
+         jidNode = [components firstObject];
+         jidDomain = [components lastObject];
+         } else {
+         jidNode = usernameRow.value;
+         }
+         }
+         
+         if (!jidNode.length) {
+         // strip whitespace and make nickname lowercase
+         jidNode = [nickname stringByReplacingOccurrencesOfString:@" " withString:@""];
+         jidNode = [jidNode lowercaseString];
+         }
+         NSNumber *rememberPassword = [[form formRowWithTag:kOTRXLFormRememberPasswordSwitchTag] value];
+         if (rememberPassword) {
+         account.rememberPassword = [rememberPassword boolValue];
+         } else {
+         account.rememberPassword = YES;
+         }
+         
+         NSString *password = [[form formRowWithTag:kOTRXLFormPasswordTextFieldTag] value];
+         
+         if (password && password.length > 0) {
+         account.password = password;
+         } else if (account.password.length == 0) {
+         // No password in field, generate strong password for user
+         account.password = [OTRPasswordGenerator passwordWithLength:20];
+         }
+         
+         NSNumber *autologin = [[form formRowWithTag:kOTRXLFormLoginAutomaticallySwitchTag] value];
+         if (autologin) {
+         account.autologin = [autologin boolValue];
+         } else {
+         account.autologin = YES;
+         }
+         // Don't login automatically for Tor accounts
+         if (account.accountType == OTRAccountTypeXMPPTor) {
+         account.autologin = NO;
+         }
+         
+         NSString *hostname = [[form formRowWithTag:kOTRXLFormHostnameTextFieldTag] value];
+         NSNumber *port = [[form formRowWithTag:kOTRXLFormPortTextFieldTag] value];
+         NSString *resource = [[form formRowWithTag:kOTRXLFormResourceTextFieldTag] value];
+         
+         if (![hostname length]) {
+         XLFormRowDescriptor *serverRow = [form formRowWithTag:kOTRXLFormXMPPServerTag];
+         if (serverRow) {
+         OTRXMPPServerInfo *serverInfo = serverRow.value;
+         hostname = serverInfo.domain;
+         }
+         }
+         account.domain = hostname;
+         
+         
+         if (port) {
+         account.port = [port intValue];
+         }
+         
+         if ([resource length]) {
+         account.resource = resource;
+         }
+         NSNumber *autofetch = [form formRowWithTag:kOTRXLFormAutomaticURLFetchTag].value;
+         if (autofetch) {
+         account.disableAutomaticURLFetching = !autofetch.boolValue;
+         }
+         
+         // Post-process values via XMPPJID for stringprep
+         
+         if (!jidDomain.length) {
+         jidDomain = account.domain;
+         }
+         */
+        XMPPJID *jid = [XMPPJID jidWithUser:jidNode domain:jidDomain resource:account.resource];
+        if (!jid) {
+            NSParameterAssert(jid != nil);
+            // DDLogError(@"Error creating JID from account values!");
+        }
+        account.username = jid.bare;
+        account.resource = jid.resource;
+        account.displayName = nickname;
+        
+        // Use server's .onion if possible, else use FQDN
+        if (account.accountType == OTRAccountTypeXMPPTor) {
+            /*
+             OTRXMPPServerInfo *serverInfo = [[form formRowWithTag:kOTRXLFormXMPPServerTag] value];
+             OTRXMPPTorAccount *torAccount = (OTRXMPPTorAccount*)self.account;
+             torAccount.onion = serverInfo.onion;
+             if (torAccount.onion.length) {
+             torAccount.domain = torAccount.onion;
+             } else if (serverInfo.server.length) {
+             torAccount.domain = serverInfo.server;
+             }
+             */
+        }
+        
+        // Start generating our OTR key here so it's ready when we need it
+        
+        [OTRProtocolManager.encryptionManager.otrKit generatePrivateKeyForAccountName:account.username protocol:kOTRProtocolTypeXMPP completion:^(OTRFingerprint *fingerprint, NSError *error) {
+            NSParameterAssert(fingerprint.fingerprint.length > 0);
+            if (fingerprint.fingerprint.length > 0) {
+                NSLog(@"Fingerprint generated for %@: %@",jid.bare, fingerprint);
+                
+                // DDLogVerbose(@"Fingerprint generated for %@: %@", jid.bare, fingerprint);
+            } else {
+                // DDLogError(@"Error generating fingerprint for %@: %@", jid.bare, error);
+                NSLog(@"Error generating fingerprint for %@: %@", jid.bare, error);
+            }
+        }];
+        self.account =  account;
+        
+        
+        // return account;
+    }
+}
+
 - (void)loginButtonPressed:(id)sender
 {
     if (self.readOnly) {
@@ -85,7 +290,17 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
         return;
     }
     self.existingAccount = (self.account != nil);
-    if ([self validForm]) {
+    // [CRYPTO_TALK] populate account
+    if (self.account == nil) {
+        [self populateAccount];
+    }
+    else {
+        OTRXMPPAccount *account = self.account;
+        account.password = self.tempPassword;
+    }
+
+    // if ([self validForm])
+    {
         self.form.disabled = YES;
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         self.navigationItem.rightBarButtonItem.enabled = NO;
@@ -94,7 +309,7 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
 
 		__weak __typeof__(self) weakSelf = self;
         self.loginAttempts += 1;
-        [self.loginHandler performActionWithValidForm:self.form account:self.account progress:^(NSInteger progress, NSString *summaryString) {
+        [self.loginHandler performActionWithValidForm:nil account:self.account progress:^(NSInteger progress, NSString *summaryString) {
             NSLog(@"Tor Progress %d: %@", (int)progress, summaryString);
             hud.progress = progress/100.0f;
             hud.label.text = summaryString;
