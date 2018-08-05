@@ -1,30 +1,33 @@
 [submodule "Submodules/OTRKit"]
 	path = Submodules/OTRKit
 	url = https://github.com/deepdatago/OTRKit.git
-[submodule "XMPPFramework"]
-	path = XMPPFramework
+[submodule "Submodules/CPAProxy"]
+	path = Submodules/CPAProxy
+	url = https://github.com/deepdatago/CPAProxy.git
+[submodule "Submodules/XMPPFramework"]
+	path = Submodules/XMPPFramework
 	url = https://github.com/deepdatago/XMPPFramework.git
-[submodule "ChatSecure-Metadata"]
-	path = ChatSecure-Metadata
+[submodule "Submodules/ChatSecure-Metadata"]
+	path = Submodules/ChatSecure-Metadata
 	url = https://github.com/deepdatago/ChatSecure-Metadata.git
-[submodule "ProxyKit"]
-	path = ProxyKit
+[submodule "Submodules/ProxyKit"]
+	path = Submodules/ProxyKit
 	url = https://github.com/deepdatago/ProxyKit.git
-[submodule "IOCipher"]
-	path = IOCipher
+[submodule "Submodules/IOCipher"]
+	path = Submodules/IOCipher
 	url = https://github.com/deepdatago/IOCipher-ObjC.git
-[submodule "xmpp-server-list"]
-	path = xmpp-server-list
+[submodule "Submodules/xmpp-server-list"]
+	path = Submodules/xmpp-server-list
 	url = https://github.com/deepdatago/xmpp-server-list.git
-[submodule "ChatSecure-Push-iOS"]
-	path = ChatSecure-Push-iOS
+[submodule "Submodules/ChatSecure-Push-iOS"]
+	path = Submodules/ChatSecure-Push-iOS
 	url = https://github.com/deepdatago/ChatSecure-Push-iOS.git
-[submodule "JSQMessagesViewController"]
-	path = JSQMessagesViewController
+[submodule "Submodules/JSQMessagesViewController"]
+	path = Submodules/JSQMessagesViewController
 	url = https://github.com/deepdatago/JSQMessagesViewController.git
-[submodule "SignalProtocol-ObjC"]
-	path = SignalProtocol-ObjC
+[submodule "Submodules/SignalProtocol-ObjC"]
+	path = Submodules/SignalProtocol-ObjC
 	url = https://github.com/deepdatago/SignalProtocol-ObjC.git
-[submodule "LumberjackConsole"]
-	path = LumberjackConsole
+[submodule "Submodules/LumberjackConsole"]
+	path = Submodules/LumberjackConsole
 	url = https://github.com/deepdatago/LumberjackConsole.git
