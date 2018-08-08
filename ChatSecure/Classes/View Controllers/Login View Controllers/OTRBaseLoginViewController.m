@@ -41,6 +41,7 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
     [OTRUsernameCell registerCellClass:[OTRUsernameCell defaultRowDescriptorType]];
     
     self.loginAttempts = 0;
+    self.tempPassword = nil;
     
     UIImage *checkImage = [UIImage imageNamed:@"ic-check" inBundle:[OTRAssets resourcesBundle] compatibleWithTraitCollection:nil];
     UIBarButtonItem *checkButton = [[UIBarButtonItem alloc] initWithImage:checkImage style:UIBarButtonItemStylePlain target:self action:@selector(loginButtonPressed:)];
@@ -82,15 +83,17 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
 {
     // [CRYPTO_TALK] just take password to create ethereum account
     NSString *password = [[self.form formRowWithTag:kOTRXLFormPasswordTextFieldTag] value];
+    NSString *nickName = [[self.form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
     DeepDatagoManager *deepDatagoManager = [[DeepDatagoManager alloc] init];
-    NSString *post = [deepDatagoManager getRegisterRequestWithPassword:(password)];
+    // NSString *post = [deepDatagoManager getRegisterRequestWithPassword:(password)];
+    NSString *post = [deepDatagoManager getRegisterRequestWithPassword:(password) nickName:nickName];
     if (post == nil) {
         return;
     }
     
     // NSString *post = [NSString stringWithFormat:@"Username=%@&Password=%@",@"username",@"password"];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-    NSString *postLength = [NSString stringWithFormat:@"%d",[postData length]];
+    NSString *postLength = [NSString stringWithFormat:@"%ld",[postData length]];
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
     [request setURL:[NSURL URLWithString:@"https://dev.deepdatago.com/service/accounts/register/"]];
     [request setHTTPMethod:@"POST"];
@@ -111,7 +114,7 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
     }
     
     
-    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    // NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     /*
      NSURLConnection *conn = [[NSURLConnection alloc] initWithRequest:request delegate:self];
      if(conn) {
@@ -300,6 +303,7 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
     }
 
     // if ([self validForm])
+    if (self.tempPassword != nil)
     {
         self.form.disabled = YES;
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];

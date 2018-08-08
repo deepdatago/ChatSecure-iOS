@@ -155,6 +155,10 @@ NSString *const kOTRXLFormAutomaticURLFetchTag               = @"kOTRXLFormAutom
         switch (accountType) {
             case OTRAccountTypeJabber:
             case OTRAccountTypeXMPPTor:{
+                // [CRYPTO_TALK] only Nick name and password are needed
+                [basicSection addFormRow:[self passwordTextFieldRowDescriptorWithValue:nil]];
+
+                /*
                 [basicSection addFormRow:[self jidTextFieldRowDescriptorWithValue:nil]];
                 [basicSection addFormRow:[self passwordTextFieldRowDescriptorWithValue:nil]];
                 [basicSection addFormRow:[self rememberPasswordRowDescriptorWithValue:YES]];
@@ -167,7 +171,7 @@ NSString *const kOTRXLFormAutomaticURLFetchTag               = @"kOTRXLFormAutom
                     [advancedSection addFormRow:[self torRowDescriptorWithValue:NO]];
                 }
                 [advancedSection addFormRow:[self autoFetchRowDescriptorWithValue:YES]];
-                
+                */
                 break;
             }
             case OTRAccountTypeGoogleTalk: {
@@ -188,7 +192,8 @@ NSString *const kOTRXLFormAutomaticURLFetchTag               = @"kOTRXLFormAutom
         }
         
         [descriptor addFormSection:basicSection];
-        [descriptor addFormSection:advancedSection];
+        // [CRYPTO_TALK] only basicSection is needed
+        // [descriptor addFormSection:advancedSection];
     }
     return descriptor;
 }
