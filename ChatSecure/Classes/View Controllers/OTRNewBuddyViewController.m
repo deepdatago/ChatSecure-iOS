@@ -203,6 +203,10 @@
         XMPPJID *jid = [XMPPJID jidWithString:newBuddyAccountName];
         if (!jid) { return; }
         
+        //[CRYPTO_TALK] get public key from server
+        // DeepDatagoManager *deepDatagoManager = [[DeepDatagoManager alloc] init];
+        // NSString *publicKey = [deepDatagoManager getAddFriendRequestWithAccount:[jid user]];
+        
         OTRXMPPManager *manager = (OTRXMPPManager *)[[OTRProtocolManager sharedInstance] protocolForAccount:self.account];
         OTRXMPPBuddy *buddy = [manager addToRosterWithJID:jid displayName:newBuddyDisplayName];
 
