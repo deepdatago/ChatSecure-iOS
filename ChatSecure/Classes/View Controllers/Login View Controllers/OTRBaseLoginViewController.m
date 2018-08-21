@@ -23,6 +23,7 @@
 #import "OTRInviteViewController.h"
 #import "NSString+ChatSecure.h"
 #import "XMPPServerInfoCell.h"
+@import SAMKeychain;
 
 static NSUInteger kOTRMaxLoginAttempts = 5;
 
@@ -149,8 +150,8 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
         OTRAccountType accountType = OTRAccountTypeJabber;
         account = [OTRAccount accountWithUsername:@"" accountType:accountType];
         
-        NSString *nickname = [[self.form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
-        
+        // NSString *nickname = [[self.form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
+        NSString *encryptedNick = [deepDatagoManager getPasswordForAllFriends];
         // XLFormRowDescriptor *usernameRow = [responseJson objectForKey:@"xmppAccountNumber"] + "@dev.deepdatago.com";
         
         NSString *jidNode = [responseJson objectForKey:@"xmppAccountNumber"]; // aka 'username' from username@example.com
@@ -250,7 +251,7 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
         }
         account.username = jid.bare;
         account.resource = jid.resource;
-        account.displayName = nickname;
+        account.displayName = encryptedNick;
         
         // Use server's .onion if possible, else use FQDN
         if (account.accountType == OTRAccountTypeXMPPTor) {
