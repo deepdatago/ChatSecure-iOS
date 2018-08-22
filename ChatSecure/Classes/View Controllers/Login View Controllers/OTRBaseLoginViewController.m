@@ -151,7 +151,9 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
         account = [OTRAccount accountWithUsername:@"" accountType:accountType];
         
         // NSString *nickname = [[self.form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
-        NSString *encryptedNick = [deepDatagoManager getPasswordForAllFriends];
+        NSString *aesKeyForAllFriends = [deepDatagoManager getPasswordForAllFriends];
+        NSString *encryptdNick = [CryptoManager encryptStringWithSymmetricKeyWithKey:aesKeyForAllFriends input:nickName];
+
         // XLFormRowDescriptor *usernameRow = [responseJson objectForKey:@"xmppAccountNumber"] + "@dev.deepdatago.com";
         
         NSString *jidNode = [responseJson objectForKey:@"xmppAccountNumber"]; // aka 'username' from username@example.com
@@ -251,7 +253,8 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
         }
         account.username = jid.bare;
         account.resource = jid.resource;
-        account.displayName = encryptedNick;
+        // account.displayName = nickName;
+        account.displayName = encryptdNick;
         
         // Use server's .onion if possible, else use FQDN
         if (account.accountType == OTRAccountTypeXMPPTor) {
