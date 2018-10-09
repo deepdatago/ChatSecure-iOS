@@ -85,7 +85,7 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
     // [CRYPTO_TALK] just take password to create ethereum account
     NSString *password = [[self.form formRowWithTag:kOTRXLFormPasswordTextFieldTag] value];
     NSString *nickName = [[self.form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
-    DeepDatagoManager *deepDatagoManager = [[DeepDatagoManager alloc] init];
+    DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
     // NSString *post = [deepDatagoManager getRegisterRequestWithPassword:(password)];
     NSString *post = [deepDatagoManager getRegisterRequestWithPassword:(password) nickName:nickName];
     if (post == nil) {
