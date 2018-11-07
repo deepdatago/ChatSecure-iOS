@@ -65,17 +65,15 @@ const CGFloat OTRBuddyInfoCellHeight = 80.0;
     NSString * name = [thread threadName];
     self.nameLabel.text = name;
 
-    /* for future enhancement which can display some other nicks, before the friend request is approved
-    // [CRYPTO_TALK] get user name if the friend request is not approved
+    // [CRYPTO_TALK] display user account as nick name if the friend request is not approved
     OTRBuddy *tmpBuddy = (OTRBuddy*)thread;
     NSString *tmpUserName = [tmpBuddy.username componentsSeparatedByString:@"@"][0];
     DeepDatagoManager* deepDatagoManager = [DeepDatagoManager sharedInstance];
     NSString *tmpAllFriendsKey = [deepDatagoManager getAllFriendsKeyByAccountWithAccount:tmpUserName];
     if (tmpAllFriendsKey == nil || tmpAllFriendsKey.length == 0) {
-        // self.nameLabel.text = tmpUserName;
+        self.nameLabel.text = tmpUserName;
     }
     // [CRYPTO_TALK] end
-     */
 
     self.accountLabel.text = account.username;
     
