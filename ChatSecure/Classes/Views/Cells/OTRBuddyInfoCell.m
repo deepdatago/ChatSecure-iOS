@@ -14,6 +14,8 @@
 @import OTRAssets;
 @import PureLayout;
 #import "OTRDatabaseManager.h"
+#import <ChatSecureCore/ChatSecureCore-Swift.h>
+
 
 const CGFloat OTRBuddyInfoCellHeight = 80.0;
 
@@ -59,10 +61,22 @@ const CGFloat OTRBuddyInfoCellHeight = 80.0;
 - (void)setThread:(id<OTRThreadOwner>)thread account:(nullable OTRAccount*)account
 {
     [super setThread:thread];
-    
+
     NSString * name = [thread threadName];
-    
     self.nameLabel.text = name;
+
+    /* for future enhancement which can display some other nicks, before the friend request is approved
+    // [CRYPTO_TALK] get user name if the friend request is not approved
+    OTRBuddy *tmpBuddy = (OTRBuddy*)thread;
+    NSString *tmpUserName = [tmpBuddy.username componentsSeparatedByString:@"@"][0];
+    DeepDatagoManager* deepDatagoManager = [DeepDatagoManager sharedInstance];
+    NSString *tmpAllFriendsKey = [deepDatagoManager getAllFriendsKeyByAccountWithAccount:tmpUserName];
+    if (tmpAllFriendsKey == nil || tmpAllFriendsKey.length == 0) {
+        // self.nameLabel.text = tmpUserName;
+    }
+    // [CRYPTO_TALK] end
+     */
+
     self.accountLabel.text = account.username;
     
     NSString *identifier = nil;

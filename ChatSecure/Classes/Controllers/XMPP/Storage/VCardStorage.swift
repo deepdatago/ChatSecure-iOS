@@ -103,15 +103,21 @@ extension VCardStorage: XMPPvCardTempModuleStorage {
                 return
             }
             vCard.vCardTemp = vCardTemp
+            /*
             // [CRYPTO_TALK] decrypt nick name for display purpose
             let deepdataGoManager = DeepDatagoManager.sharedInstance()
-            let allFriendsSymmetricKey = deepdataGoManager.getPasswordForAllFriends()
+            let allFriendsSymmetricKey = deepdataGoManager.getAllFriendsKeyByAccount(account: jid.user as! NSString)
+            if (allFriendsSymmetricKey != nil && (allFriendsSymmetricKey! as String).count == 0) {
+                // vCard.vCardTemp?.nickname = jid.user
+            }
             if (allFriendsSymmetricKey != nil && (allFriendsSymmetricKey! as String).count > 0 && vCardTemp.nickname != nil) {
                 let decryptedNickName = CryptoManager.decryptStringWithSymmetricKey(key: allFriendsSymmetricKey!, base64Input: vCardTemp.nickname! as NSString) as String
                 if (decryptedNickName.count > 0) {
                     vCard.vCardTemp?.nickname = decryptedNickName
                 }
             }
+            // [CRYPTO_TALK] end
+            */
 
             vCard.waitingForvCardTempFetch = false
             vCard.lastUpdatedvCardTemp = Date()

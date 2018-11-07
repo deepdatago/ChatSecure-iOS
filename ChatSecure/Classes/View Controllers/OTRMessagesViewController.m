@@ -642,8 +642,20 @@ typedef NS_ENUM(int, OTRDropDownType) {
         account =  [self accountWithTransaction:transaction];
     }];
     
+    // tmpBuddy.username
     titleView.titleLabel.text = [thread threadName];
-    
+    /* for future enhancement which can display some other nicks, before the friend request is approved
+    // [CRYPTO_TALK] get user name if the friend request is not approved
+    OTRBuddy *tmpBuddy = (OTRBuddy*)thread;
+    NSString *tmpUserName = [tmpBuddy.username componentsSeparatedByString:@"@"][0];
+    DeepDatagoManager* deepDatagoManager = [DeepDatagoManager sharedInstance];
+    NSString *tmpAllFriendsKey = [deepDatagoManager getAllFriendsKeyByAccountWithAccount:tmpUserName];
+    if (tmpAllFriendsKey == nil || tmpAllFriendsKey.length == 0) {
+        // titleView.titleLabel.text = tmpUserName;
+    }
+    // [CRYPTO_TALK] end
+     */
+
     UIImage *statusImage = nil;
     if ([thread isKindOfClass:[OTRBuddy class]]) {
         OTRBuddy *buddy = (OTRBuddy*)thread;

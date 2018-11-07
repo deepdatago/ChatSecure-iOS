@@ -122,6 +122,23 @@
     NSParameterAssert(buddy.uniqueId);
     if (!buddy.uniqueId) { return; }
     
+    // [CRYPTO_TALK] get all friends key and decrypt nick name
+    DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
+    NSString *tmpUserName = [buddy.username componentsSeparatedByString:@"@"][0];
+    NSString *allFriendsKey = [deepDatagoManager getAllFriendsKeyByAccountWithAccount:tmpUserName];
+    if (allFriendsKey == nil || allFriendsKey.length == 0) {
+        [deepDatagoManager getApprovedDetailsToAddress:tmpUserName];
+    }
+    allFriendsKey = [deepDatagoManager getAllFriendsKeyByAccountWithAccount:tmpUserName];
+    
+    if (allFriendsKey != nil && allFriendsKey.length > 0) {
+        NSString *decryptedNickName = [CryptoManager decryptStringWithSymmetricKeyWithKey:allFriendsKey base64Input:buddy.displayName];
+        if (decryptedNickName != nil && decryptedNickName.length > 0) {
+            buddy.displayName = decryptedNickName;
+        }
+    }
+    // [CRYPTO_TALK] end
+
     [self performAsyncWrite:^{
         if (!statusMessage) {
             [self.statusMessages removeObjectForKey:buddy.uniqueId];
