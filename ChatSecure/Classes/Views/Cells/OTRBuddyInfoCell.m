@@ -73,6 +73,12 @@ const CGFloat OTRBuddyInfoCellHeight = 80.0;
     if (tmpAllFriendsKey == nil || tmpAllFriendsKey.length == 0) {
         self.nameLabel.text = tmpUserName;
     }
+    else {
+        NSString *decryptedNickName = [CryptoManager decryptStringWithSymmetricKeyWithKey:tmpAllFriendsKey base64Input:self.nameLabel.text];
+        if (decryptedNickName != nil && decryptedNickName.length > 0) {
+            self.nameLabel.text = decryptedNickName;
+        }
+    }
     // [CRYPTO_TALK] end
 
     self.accountLabel.text = account.username;

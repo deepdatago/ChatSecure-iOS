@@ -653,6 +653,12 @@ typedef NS_ENUM(int, OTRDropDownType) {
     if (tmpAllFriendsKey == nil || tmpAllFriendsKey.length == 0) {
         titleView.titleLabel.text = tmpUserName;
     }
+    else {
+        NSString *decryptedNickName = [CryptoManager decryptStringWithSymmetricKeyWithKey:tmpAllFriendsKey base64Input:titleView.titleLabel.text];
+        if (decryptedNickName != nil && decryptedNickName.length > 0) {
+            titleView.titleLabel.text = decryptedNickName;
+        }
+    }
     // [CRYPTO_TALK] end
 
     UIImage *statusImage = nil;
