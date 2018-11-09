@@ -556,9 +556,13 @@ extension MessageQueueHandler {
         let otrKitSend = {
             self.waitingForMessage(message.uniqueId, messageCollection: OTROutgoingMessage.collection, messageSecurity:message.messageSecurity, completion: completion)
             // [CRYPTO_TALK]
-            let testKey = "63A78349DF7544768E0ECBCF3ACB6527";
-            let aesText = CryptoManager.encryptStringWithSymmetricKey(key: testKey as NSString, input: text as NSString)
-            NSLog("encrypted string: \((aesText!))")
+            // let testKey = "63A78349DF7544768E0ECBCF3ACB6527";
+            let tmpAccount = buddyUsername.components(separatedBy: "@")[0]
+            let deepDatagoManager = DeepDatagoManager.sharedInstance()
+            let testKey = deepDatagoManager.getSymmetricKeyForAccount(account: tmpAccount as NSString)
+
+            let aesText = CryptoManager.encryptStringWithSymmetricKey(key: testKey!, input: text as NSString)
+            // NSLog("encrypted string: \((aesText!))")
             otrKit.encodeMessage(aesText! as String, tlvs: nil, username:buddyUsername , accountName: accountUsername, protocol: accountProtocolStrintg, tag: message)
         }
         
