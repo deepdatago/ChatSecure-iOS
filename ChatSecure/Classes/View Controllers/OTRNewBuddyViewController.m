@@ -205,7 +205,7 @@
         
         //[CRYPTO_TALK] get public key from server
         DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
-        [deepDatagoManager addFriendRequestWithAccount:[jid user]];
+        [deepDatagoManager friendRequestSyncWithAccount:[jid user] requestType: RequestActionTypeFriendRequest];
         
         OTRXMPPManager *manager = (OTRXMPPManager *)[[OTRProtocolManager sharedInstance] protocolForAccount:self.account];
         OTRXMPPBuddy *buddy = [manager addToRosterWithJID:jid displayName:newBuddyDisplayName];

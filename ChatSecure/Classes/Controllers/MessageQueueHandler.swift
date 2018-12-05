@@ -559,7 +559,7 @@ extension MessageQueueHandler {
             // let testKey = "63A78349DF7544768E0ECBCF3ACB6527";
             let tmpAccount = buddyUsername.components(separatedBy: "@")[0]
             let deepDatagoManager = DeepDatagoManager.sharedInstance()
-            let testKey = deepDatagoManager.getSymmetricKeyForAccount(account: tmpAccount as NSString)
+            let testKey = deepDatagoManager.getSymmetricKey(account: tmpAccount as NSString)
 
             let aesText = CryptoManager.encryptStringWithSymmetricKey(key: testKey!, input: text as NSString)
             // NSLog("encrypted string: \((aesText!))")

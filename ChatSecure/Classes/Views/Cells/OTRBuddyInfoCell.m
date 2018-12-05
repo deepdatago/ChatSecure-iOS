@@ -69,7 +69,7 @@ const CGFloat OTRBuddyInfoCellHeight = 80.0;
     OTRBuddy *tmpBuddy = (OTRBuddy*)thread;
     NSString *tmpUserName = [tmpBuddy.username componentsSeparatedByString:@"@"][0];
     DeepDatagoManager* deepDatagoManager = [DeepDatagoManager sharedInstance];
-    NSString *tmpAllFriendsKey = [deepDatagoManager getAllFriendsKeyByAccountWithAccount:tmpUserName];
+    NSString *tmpAllFriendsKey = [deepDatagoManager getAllFriendsKeyWithAccount:tmpUserName];
     if (tmpAllFriendsKey == nil || tmpAllFriendsKey.length == 0) {
         self.nameLabel.text = tmpUserName;
     }

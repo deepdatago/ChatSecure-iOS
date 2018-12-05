@@ -106,7 +106,7 @@ extension VCardStorage: XMPPvCardTempModuleStorage {
 
             // [CRYPTO_TALK] decrypt nick name for display purpose
             let deepdataGoManager = DeepDatagoManager.sharedInstance()
-            let allFriendsSymmetricKey = deepdataGoManager.getAllFriendsKeyByAccount(account: jid.user as! NSString)
+            let allFriendsSymmetricKey = deepdataGoManager.getAllFriendsKey(account: jid.user as! NSString)
             if (allFriendsSymmetricKey != nil && (allFriendsSymmetricKey! as String).count == 0) {
                 // vCard.vCardTemp?.nickname = jid.user
             }

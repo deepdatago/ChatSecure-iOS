@@ -398,6 +398,11 @@ static CGFloat kOTRConversationCellHeight = 80.0;
     OTRXMPPManager *manager = (OTRXMPPManager*)[[OTRProtocolManager sharedInstance] protocolForAccount:account];
     [buddy setAskingForApproval:NO];
     if (approved) {
+        // [CRYPTO_TALK]
+        // buddy.displayName: 348c2e7c794b45984bdc9cafdf97374fbf980ae7
+        DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
+        [deepDatagoManager friendRequestSyncWithAccount:buddy.displayName requestType: RequestActionTypeApproveRequest];
+        // [CRYPTO_TALK] end
         [[OTRDatabaseManager sharedInstance].writeConnection readWriteWithBlock:^(YapDatabaseReadWriteTransaction *transaction) {
             buddy.trustLevel = BuddyTrustLevelRoster;
             [buddy saveWithTransaction:transaction];

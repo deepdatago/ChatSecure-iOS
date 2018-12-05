@@ -125,11 +125,11 @@
     // [CRYPTO_TALK] get all friends key and decrypt nick name
     DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
     NSString *tmpUserName = [buddy.username componentsSeparatedByString:@"@"][0];
-    NSString *allFriendsKey = [deepDatagoManager getAllFriendsKeyByAccountWithAccount:tmpUserName];
+    NSString *allFriendsKey = [deepDatagoManager getAllFriendsKeyWithAccount:tmpUserName];
     if (allFriendsKey == nil || allFriendsKey.length == 0) {
         [deepDatagoManager getApprovedDetailsToAddress:tmpUserName];
     }
-    allFriendsKey = [deepDatagoManager getAllFriendsKeyByAccountWithAccount:tmpUserName];
+    allFriendsKey = [deepDatagoManager getAllFriendsKeyWithAccount:tmpUserName];
     
     if (allFriendsKey != nil && allFriendsKey.length > 0) {
         NSString *decryptedNickName = [CryptoManager decryptStringWithSymmetricKeyWithKey:allFriendsKey base64Input:buddy.displayName];

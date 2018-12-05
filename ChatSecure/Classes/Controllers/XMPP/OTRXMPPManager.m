@@ -1051,6 +1051,11 @@ typedef NS_ENUM(NSInteger, XMPPClientState) {
             [buddy setAskingForApproval:YES];
             [buddy saveWithTransaction:transaction];
             [[UIApplication sharedApplication] showLocalNotificationForSubscriptionRequestFrom:jidStrBare];
+            
+            // [CRYPTO_TALK] getSummary of the incoming request
+            DeepDatagoManager* deepDatagoManager = [DeepDatagoManager sharedInstance];
+            BOOL processSummaryResult = [deepDatagoManager getSummaryWithAccount:@""];
+            // [CRYPTO_TALK] end
         }
     }];
 }
