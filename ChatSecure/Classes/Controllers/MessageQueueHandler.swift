@@ -555,14 +555,14 @@ extension MessageQueueHandler {
         let otrKit = OTRProtocolManager.encryptionManager.otrKit
         let otrKitSend = {
             self.waitingForMessage(message.uniqueId, messageCollection: OTROutgoingMessage.collection, messageSecurity:message.messageSecurity, completion: completion)
-            // [CRYPTO_TALK]
-            // let testKey = "63A78349DF7544768E0ECBCF3ACB6527";
+            // [CRYPTO_TALK] encrypt data by symmetric key
             let tmpAccount = buddyUsername.components(separatedBy: "@")[0]
             let deepDatagoManager = DeepDatagoManager.sharedInstance()
             let testKey = deepDatagoManager.getSymmetricKey(account: tmpAccount as NSString)
 
             let aesText = CryptoManager.encryptStringWithSymmetricKey(key: testKey!, input: text as NSString)
             // NSLog("encrypted string: \((aesText!))")
+            // [CRYPTO_TALK] end
             otrKit.encodeMessage(aesText! as String, tlvs: nil, username:buddyUsername , accountName: accountUsername, protocol: accountProtocolStrintg, tag: message)
         }
         

@@ -124,6 +124,7 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
     let internalQueue = DispatchQueue(label: "FileTransferManager Queue")
     let callbackQueue = DispatchQueue.main
     let sessionManager: SessionManager
+    var buddy: String
     private var servers: [HTTPServer] = []
     
     @objc public var canUploadFiles: Bool {
@@ -141,6 +142,7 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
         self.serverCapabilities = serverCapabilities
         self.httpFileUpload = XMPPHTTPFileUpload()
         self.connection = connection
+        self.buddy = "" // [CRYPTO_TALK] to save the buddy info stored in message
         self.sessionManager = Alamofire.SessionManager(configuration: sessionConfiguration)
         super.init()
         if let stream = serverCapabilities.xmppStream {
@@ -278,7 +280,7 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
             }
             
             // [CRYPTO_TALK] encrypt data to be uploaded
-            let testKey = "63A78349DF7544768E0ECBCF3ACB6527";
+            let testKey = "8ff894c08e3c4b9bbde1d04418a3c589";
             let encryptedData = CryptoManager.encryptDataWithSymmetricKey(key: testKey as NSString, inputData: outData)!
             self.httpFileUpload.requestSlot(fromService: service.jid, filename: filename, size: UInt(encryptedData.count), contentType: contentType, completion: { (slot: XMPPSlot?, iq: XMPPIQ?, error: Error?) in
                 guard let slot = slot else {
@@ -540,6 +542,13 @@ extension FileTransferManager {
     
     /** creates downloadmessages and then downloads if needed. parent message should already be saved! @warn Do not call from within an existing db transaction! */
     @objc public func createAndDownloadItemsIfNeeded(message: OTRMessageProtocol, force: Bool, transaction: YapDatabaseReadWriteTransaction) {
+        // [CRYPTO_TALK] to save buddy info for decryption purpose
+        let msgBuddy =  message.buddy(with:transaction)
+        if msgBuddy != nil && msgBuddy?.bareJID != nil {
+            self.buddy = String((msgBuddy?.bareJID?.bare)!.split(separator: "@")[0])
+        }
+        // [CRYPTO_TALK] end
+        
         if message.messageMediaItemKey != nil || message.messageText?.count == 0 || message.downloadableURLs.count == 0 {
             //DDLogVerbose("Download of message not needed \(message.messageKey)")
             return
@@ -703,9 +712,11 @@ extension FileTransferManager {
             return
         }
         
-        // [CRYPTO_TALK] decrypt received inData
-        let testKey = "63A78349DF7544768E0ECBCF3ACB6527"
-        let decryptedData = CryptoManager.decryptDataWithSymmetricKey(key: testKey as NSString, inputData: inData!)
+        // [CRYPTO_TALK] decrypt received inData using correct symmetric key
+        let deepDatagoManager = DeepDatagoManager.sharedInstance()
+        let testKey = deepDatagoManager.getSymmetricKey(account: self.buddy as NSString)
+        let decryptedData = CryptoManager.decryptDataWithSymmetricKey(key: testKey!, inputData: inData!)
+        // [CRYPTO_TALK] end
         
         guard var data = decryptedData, let response = urlResponse, let url = response.url else {
             let error = FileTransferError.fileNotFound
