@@ -279,9 +279,11 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
                 }
             }
             
-            // [CRYPTO_TALK] encrypt data to be uploaded
-            let testKey = "8ff894c08e3c4b9bbde1d04418a3c589";
-            let encryptedData = CryptoManager.encryptDataWithSymmetricKey(key: testKey as NSString, inputData: outData)!
+            // [CRYPTO_TALK] decrypt received inData using correct symmetric key
+            let deepDatagoManager = DeepDatagoManager.sharedInstance()
+            let testKey = deepDatagoManager.getSymmetricKey(account: self.buddy as NSString)
+
+            let encryptedData = CryptoManager.encryptDataWithSymmetricKey(key: testKey!, inputData: outData)!
             self.httpFileUpload.requestSlot(fromService: service.jid, filename: filename, size: UInt(encryptedData.count), contentType: contentType, completion: { (slot: XMPPSlot?, iq: XMPPIQ?, error: Error?) in
                 guard let slot = slot else {
                     let outError = error ?? FileTransferError.serverError
@@ -405,6 +407,13 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
     
     @objc public func send(image: UIImage, thread: OTRThreadOwner) {
         internalQueue.async {
+            // [CRYPTO_TALK] to save buddy info for decryption purpose
+            let msgBuddy =  (thread as? OTRBuddy)
+            if msgBuddy != nil && msgBuddy?.username != nil {
+                self.buddy = String(((msgBuddy?.username)?.split(separator: "@")[0])!)
+            }
+            // [CRYPTO_TALK] end
+
             guard let service = self.servers.first, service.maxSize > 0 else {
                 DDLogError("No HTTP upload service available!")
                 return
