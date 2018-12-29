@@ -401,7 +401,7 @@ static CGFloat kOTRConversationCellHeight = 80.0;
         // [CRYPTO_TALK]
         // buddy.displayName: 348c2e7c794b45984bdc9cafdf97374fbf980ae7
         DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
-        [deepDatagoManager friendRequestSyncWithAccount:buddy.displayName requestType: RequestActionTypeApproveRequest];
+        [deepDatagoManager friendRequestSyncWithAccount:[buddy.username componentsSeparatedByString:@"@"][0] requestType: RequestActionTypeApproveRequest];
         // [CRYPTO_TALK] end
         [[OTRDatabaseManager sharedInstance].writeConnection readWriteWithBlock:^(YapDatabaseReadWriteTransaction *transaction) {
             buddy.trustLevel = BuddyTrustLevelRoster;

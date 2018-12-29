@@ -74,9 +74,14 @@ const CGFloat OTRBuddyInfoCellHeight = 80.0;
         self.nameLabel.text = tmpUserName;
     }
     else {
-        NSString *decryptedNickName = [CryptoManager decryptStringWithSymmetricKeyWithKey:tmpAllFriendsKey base64Input:self.nameLabel.text];
+        NSString *decryptedNickName = [deepDatagoManager getDecryptedNickWithAccount:tmpUserName];
+        if (decryptedNickName == nil || decryptedNickName.length == 0) {
+            decryptedNickName = [CryptoManager decryptStringWithSymmetricKeyWithKey:tmpAllFriendsKey base64Input:self.nameLabel.text];
+        }
+
         if (decryptedNickName != nil && decryptedNickName.length > 0) {
             self.nameLabel.text = decryptedNickName;
+            tmpBuddy.displayName = decryptedNickName;
         }
     }
     // [CRYPTO_TALK] end
