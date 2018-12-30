@@ -303,7 +303,18 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
     }
     else {
         OTRXMPPAccount *account = self.account;
+        // [CRYPTO_TALK] do not change password, only change nick name
+        self.tempPassword = [[self.form formRowWithTag:kOTRXLFormPasswordTextFieldTag] value];
         account.password = self.tempPassword;
+        NSString *nickName = [[self.form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
+        if (nickName != nil) {
+            DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
+            NSString *aesKeyForAllFriends = [deepDatagoManager getPasswordForAllFriends];
+            NSString *encryptedNick = [CryptoManager encryptStringWithSymmetricKeyWithKey:aesKeyForAllFriends input:nickName];
+            self.account.displayName = encryptedNick;
+        }
+        // [CRYPTO_TALK] end
+
     }
 
     // if ([self validForm])
