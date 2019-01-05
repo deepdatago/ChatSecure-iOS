@@ -12,6 +12,7 @@ import CocoaLumberjack
 import OTRKit
 import Alamofire
 import OTRAssets
+import DeepDatago
 
 extension UIImage {
     enum DataSize {

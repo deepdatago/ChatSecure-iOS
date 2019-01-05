@@ -24,6 +24,7 @@
 #import "NSString+ChatSecure.h"
 #import "XMPPServerInfoCell.h"
 @import SAMKeychain;
+@import DeepDatago;
 
 static NSUInteger kOTRMaxLoginAttempts = 5;
 
@@ -253,8 +254,8 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
         }
         account.username = jid.bare;
         account.resource = jid.resource;
-        // account.displayName = nickName;
-        account.displayName = encryptdNick;
+        account.displayName = nickName;
+        // account.displayName = encryptdNick;
         
         // Use server's .onion if possible, else use FQDN
         if (account.accountType == OTRAccountTypeXMPPTor) {
@@ -303,22 +304,22 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
     }
     else {
         OTRXMPPAccount *account = self.account;
+        if (self.tempPassword != nil) {
+            account.password = self.tempPassword;
+        }
         // [CRYPTO_TALK] do not change password, only change nick name
-        self.tempPassword = [[self.form formRowWithTag:kOTRXLFormPasswordTextFieldTag] value];
-        account.password = self.tempPassword;
+        // self.tempPassword = [[self.form formRowWithTag:kOTRXLFormPasswordTextFieldTag] value];
+        // account.password = self.tempPassword;
         NSString *nickName = [[self.form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
         if (nickName != nil) {
-            DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
-            NSString *aesKeyForAllFriends = [deepDatagoManager getPasswordForAllFriends];
-            NSString *encryptedNick = [CryptoManager encryptStringWithSymmetricKeyWithKey:aesKeyForAllFriends input:nickName];
-            self.account.displayName = encryptedNick;
+            self.account.displayName = nickName;
         }
         // [CRYPTO_TALK] end
 
     }
 
     // if ([self validForm])
-    if (self.tempPassword != nil)
+    // if (self.tempPassword != nil)
     {
         self.form.disabled = YES;
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];

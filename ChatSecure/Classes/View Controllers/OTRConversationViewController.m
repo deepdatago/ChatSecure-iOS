@@ -38,6 +38,7 @@
 #import "OTRStrings.h"
 #import "OTRvCard.h"
 #import "XMPPvCardTemp.h"
+@import DeepDatago;
 
 static CGFloat kOTRConversationCellHeight = 80.0;
 

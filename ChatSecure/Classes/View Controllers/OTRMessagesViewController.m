@@ -60,6 +60,7 @@
 @import AVFoundation;
 @import MediaPlayer;
 @import AVKit;
+@import DeepDatago;
 
 static NSTimeInterval const kOTRMessageSentDateShowTimeInterval = 5 * 60;
 static NSUInteger const kOTRMessagePageSize = 50;

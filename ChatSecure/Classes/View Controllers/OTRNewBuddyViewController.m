@@ -21,6 +21,7 @@
 
 @import QRCodeReaderViewController;
 @import XMPPFramework;
+@import DeepDatago;
 
 #import "NSURL+ChatSecure.h"
 #import <ChatSecureCore/ChatSecureCore-Swift.h>
