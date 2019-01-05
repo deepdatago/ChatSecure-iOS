@@ -8,6 +8,7 @@
 
 import Foundation
 import XMPPFramework
+import DeepDatago
 
 public class VCardStorage: NSObject {
     let connections: DatabaseConnections

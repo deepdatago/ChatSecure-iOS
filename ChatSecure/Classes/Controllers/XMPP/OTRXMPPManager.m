@@ -55,7 +55,7 @@
 #import "OTRXMPPTorManager.h"
 #import "OTRTorManager.h"
 @import OTRAssets;
-
+@import DeepDatago;
 
 NSTimeInterval const kOTRChatStatePausedTimeout   = 5;
 NSTimeInterval const kOTRChatStateInactiveTimeout = 120;

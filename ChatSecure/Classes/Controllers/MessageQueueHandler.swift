@@ -10,6 +10,7 @@ import Foundation
 import YapTaskQueue
 import XMPPFramework
 import CocoaLumberjack
+import DeepDatago
 
 private class OutstandingActionInfo: Hashable, Equatable {
     let action:YapTaskQueueAction

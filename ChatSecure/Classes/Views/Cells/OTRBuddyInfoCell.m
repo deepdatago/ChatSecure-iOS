@@ -15,7 +15,7 @@
 @import PureLayout;
 #import "OTRDatabaseManager.h"
 #import <ChatSecureCore/ChatSecureCore-Swift.h>
-
+@import DeepDatago;
 
 const CGFloat OTRBuddyInfoCellHeight = 80.0;
 

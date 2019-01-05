@@ -10,6 +10,7 @@
 #import "OTRDatabaseManager.h"
 #import "OTRYapDatabaseObject.h"
 #import <ChatSecureCore/ChatSecureCore-Swift.h>
+@import DeepDatago;
 
 @implementation OTRXMPPRoomRuntimeProperties
 - (instancetype)init {
