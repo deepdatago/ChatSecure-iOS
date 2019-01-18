@@ -88,43 +88,15 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
     NSString *nickName = [[self.form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
     DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
     // NSString *post = [deepDatagoManager getRegisterRequestWithPassword:(password)];
-    NSString *post = [deepDatagoManager getRegisterRequestWithPassword:(password) nickName:nickName];
-    if (post == nil) {
+    NSData *data = [deepDatagoManager registerRequestWithPassword:(password) nickName:nickName];
+    if (data == nil) {
         return;
     }
-    
-    // NSString *post = [NSString stringWithFormat:@"Username=%@&Password=%@",@"username",@"password"];
-    NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-    NSString *postLength = [NSString stringWithFormat:@"%ld",[postData length]];
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
-    [request setURL:[NSURL URLWithString:@"https://dev.deepdatago.com/service/accounts/register/"]];
-    [request setHTTPMethod:@"POST"];
-    [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
-    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:postData];
-    
-    NSURLResponse *response = nil;
-    NSError *error = nil;
-    NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*) response;
-    long myCode = [httpResponse statusCode];
+
     id responseJson = nil;
-    if (myCode == 200) {
-        responseJson = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-        NSLog(@"%@",[responseJson objectForKey:@"xmppAccountPassword"]);
-        
-    }
-    
-    
-    // NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    /*
-     NSURLConnection *conn = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-     if(conn) {
-     NSLog(@"Connection Successful");
-     } else {
-     NSLog(@"Connection could not be made");
-     }
-     */
+    responseJson = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    NSLog(@"%@",[responseJson objectForKey:@"xmppAccountPassword"]);
+
     
     {
         /*
@@ -155,15 +127,13 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
         NSString *aesKeyForAllFriends = [deepDatagoManager getPasswordForAllFriends];
         NSString *encryptdNick = [CryptoManager encryptStringWithSymmetricKeyWithKey:aesKeyForAllFriends input:nickName];
 
-        // XLFormRowDescriptor *usernameRow = [responseJson objectForKey:@"xmppAccountNumber"] + "@dev.deepdatago.com";
-        
         NSString *jidNode = [responseJson objectForKey:@"xmppAccountNumber"]; // aka 'username' from username@example.com
-        NSString *jidDomain = @"dev.deepdatago.com";
+        NSString *jidDomain = [deepDatagoManager getDomain];
         account.rememberPassword = YES;
         account.password = [responseJson objectForKey:@"xmppAccountPassword"];
         self.tempPassword = [responseJson objectForKey:@"xmppAccountPassword"];
         account.autologin = YES;
-        account.domain = @"dev.deepdatago.com";
+        account.domain = [deepDatagoManager getDomain];
         account.port = 5222;
         account.disableAutomaticURLFetching = NO;
 

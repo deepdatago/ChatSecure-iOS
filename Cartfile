@@ -9,7 +9,7 @@ github "PureLayout/PureLayout" ~> 3.0
 github "facebook/KVOController" ~> 1.2
 github "xmartlabs/XLForm" ~> 4.0.0
 github "mattt/FormatterKit" ~> 1.8
-github "deepdatago/DeepDatago" ~> 1.0.5
+github "deepdatago/DeepDatago" ~> 1.0.6
 
 ### Using CocoaPods due to Swift 3->4 issues ###
 # github "RNCryptor/RNCryptor" ~> "c695657"
