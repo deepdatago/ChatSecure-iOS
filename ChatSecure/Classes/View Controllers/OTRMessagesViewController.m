@@ -60,7 +60,10 @@
 @import AVFoundation;
 @import MediaPlayer;
 @import AVKit;
+// [CRYPTO_TALK] add dependencies
 @import DeepDatago;
+#import <objc/runtime.h>
+// [CRYPTO_TALK] end
 
 static NSTimeInterval const kOTRMessageSentDateShowTimeInterval = 5 * 60;
 static NSUInteger const kOTRMessagePageSize = 50;
@@ -648,16 +651,19 @@ typedef NS_ENUM(int, OTRDropDownType) {
 
     // [CRYPTO_TALK] display user account as nick name if the friend request is not approved
     OTRBuddy *tmpBuddy = (OTRBuddy*)thread;
-    NSString *tmpUserName = [tmpBuddy.username componentsSeparatedByString:@"@"][0];
-    DeepDatagoManager* deepDatagoManager = [DeepDatagoManager sharedInstance];
-    NSString *tmpAllFriendsKey = [deepDatagoManager getAllFriendsKeyWithAccount:tmpUserName];
-    if (tmpAllFriendsKey == nil || tmpAllFriendsKey.length == 0) {
-        titleView.titleLabel.text = tmpUserName;
-    }
-    else {
-        NSString *decryptedNickName = [CryptoManager decryptStringWithSymmetricKeyWithKey:tmpAllFriendsKey base64Input:titleView.titleLabel.text];
-        if (decryptedNickName != nil && decryptedNickName.length > 0) {
-            titleView.titleLabel.text = decryptedNickName;
+    // group/conference chat: tmpBuddy isKindOfClass:[ChatSecureCore.OTRXMPPRoom class]
+    if ([tmpBuddy isKindOfClass:[OTRXMPPBuddy class]]) {
+        NSString *tmpUserName = [tmpBuddy.username componentsSeparatedByString:@"@"][0];
+        DeepDatagoManager* deepDatagoManager = [DeepDatagoManager sharedInstance];
+        NSString *tmpAllFriendsKey = [deepDatagoManager getAllFriendsKeyWithAccount:tmpUserName];
+        if (tmpAllFriendsKey == nil || tmpAllFriendsKey.length == 0) {
+            titleView.titleLabel.text = tmpUserName;
+        }
+        else {
+            NSString *decryptedNickName = [CryptoManager decryptStringWithSymmetricKeyWithKey:tmpAllFriendsKey base64Input:titleView.titleLabel.text];
+            if (decryptedNickName != nil && decryptedNickName.length > 0) {
+                titleView.titleLabel.text = decryptedNickName;
+            }
         }
     }
     // [CRYPTO_TALK] end
@@ -2361,13 +2367,21 @@ heightForCellBottomLabelAtIndexPath:(NSIndexPath *)indexPath
     NSString *service = [xmppManager.roomManager.conferenceServicesJID firstObject];
     if (service.length > 0) {
         NSString *roomName = [NSUUID UUID].UUIDString;
+        // [CRYPTO_TALK] add ios group prefix
+        roomName = [NSString stringWithFormat:@"%@%@", @"ios-group-", roomName];
+        // [CRYPTO_TALK] end: add ios group prefix
         XMPPJID *roomJID = [XMPPJID jidWithString:[NSString stringWithFormat:@"%@@%@",roomName,service]];
         self.threadKey = [xmppManager.roomManager startGroupChatWithBuddies:buddies roomJID:roomJID nickname:account.displayName subject:name];
         
         // Mark new room as seen
         [self setRoomSeen];
-        
+
         [self setThreadKey:self.threadKey collection:[OTRXMPPRoom collection]];
+
+        // [CRYPTO_TALK] invite buddies.
+        OTRXMPPManager *xmpp = (OTRXMPPManager*)[OTRProtocolManager.shared protocolForAccount:account];
+        [xmpp.roomManager inviteBuddies:buddies toRoom:[xmpp.roomManager roomForJID:roomJID]];
+        // end of [CRYPTO_TALK] invite buddies
     } else {
         DDLogError(@"No conference server for account: %@", account.username);
     }
