@@ -9,6 +9,7 @@
 import Foundation
 import XMPPFramework
 import YapDatabase
+import DeepDatago
 
 @objc public class RoomStorage: NSObject {
     
@@ -109,6 +110,12 @@ import YapDatabase
             if let body = body {
                 message.messageText = body
             }
+            // [CRYPTO_TALK] get groupKey to decrypt message
+            let deepDatagoManager = DeepDatagoManager.sharedInstance()
+            let groupKey = deepDatagoManager.getGroupKey(group: roomJID.bare as NSString)
+            let decryptedMessage = CryptoManager.decryptStringWithSymmetricKey(key: groupKey!, base64Input: message.messageText! as NSString)
+            message.messageText = decryptedMessage! as String
+            // [CRYPTO_TALK] END get groupKey to decrypt message
             message.originId = originId
             message.stanzaId = stanzaId
             

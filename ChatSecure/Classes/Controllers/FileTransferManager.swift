@@ -284,7 +284,10 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
             let deepDatagoManager = DeepDatagoManager.sharedInstance()
             let testKey = deepDatagoManager.getSymmetricKey(account: self.buddy as NSString)
 
-            let encryptedData = CryptoManager.encryptDataWithSymmetricKey(key: testKey!, inputData: outData)!
+            var encryptedData = CryptoManager.encryptDataWithSymmetricKey(key: testKey!, inputData: outData)!
+            // if (testKey?.length == 0) {
+            encryptedData = outData
+            // }
             self.httpFileUpload.requestSlot(fromService: service.jid, filename: filename, size: UInt(encryptedData.count), contentType: contentType, completion: { (slot: XMPPSlot?, iq: XMPPIQ?, error: Error?) in
                 guard let slot = slot else {
                     let outError = error ?? FileTransferError.serverError

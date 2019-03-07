@@ -13,7 +13,7 @@
 #import "OTRBuddyCache.h"
 @import YapDatabase;
 #import "OTRLog.h"
-
+@import DeepDatago;
 
 @interface OTRXMPPRoomManager () <XMPPMUCDelegate, XMPPRoomDelegate, XMPPStreamDelegate, OTRYapViewHandlerDelegateProtocol>
 
@@ -360,6 +360,14 @@
         DDLogWarn(@"Received room invitation from someone not on our roster! %@ %@", fromJID, message);
         return;
     }
+    
+    // [CRYPTO_TALK] get room key
+    DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
+    NSString* groupAddress = [roomJID.bare componentsSeparatedByString:@"@"][0];
+    BOOL getGroupKeyFlag = [deepDatagoManager getGroupKeyFromServerWithGroupAddress:groupAddress];
+    // NSString* groupKey = [deepDatagoManager getGroupKeyWithGroup:groupAddress];
+    // NSString* groupKey2 = [deepDatagoManager getGroupKeyWithGroup:groupAddress];
+    // [CRYPTO_TALK] END get room key
     [self joinRoom:roomJID withNickname:nickname subject:nil password:password];
 }
 
