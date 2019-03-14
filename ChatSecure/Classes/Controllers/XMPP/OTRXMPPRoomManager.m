@@ -186,15 +186,25 @@
         return;
     }
     NSMutableArray<XMPPJID*> *buddyJIDs = [NSMutableArray arrayWithCapacity:buddyUniqueIds.count];
+    // [CRYPTO_TALK] create inviteeArray
+    NSMutableArray<NSString*> *inviteeArray = [NSMutableArray arrayWithCapacity:buddyUniqueIds.count];
+
     [self.databaseConnection readWithBlock:^(YapDatabaseReadTransaction * _Nonnull transaction) {
         [buddyUniqueIds enumerateObjectsUsingBlock:^(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             OTRXMPPBuddy *buddy = [OTRXMPPBuddy fetchObjectWithUniqueID:obj transaction:transaction];
             XMPPJID *buddyJID = buddy.bareJID;
             if (buddyJID) {
                 [buddyJIDs addObject:buddyJID];
+                [inviteeArray addObject:buddyJID.bare];
             }
         }];
     }];
+    
+    // [CRYPTO_TALK] send inviteeArray to Crypto Server
+    DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
+    BOOL createGroupFlag = [deepDatagoManager createGroupChatWithGroupAddress:room.roomJID.bare inviteeArray:inviteeArray];
+    // [CRYPTO_TALK] end send inviteeArray to Crypto Server
+    
     // XMPPRoom.inviteUsers doesn't seem to work, so you have
     // to send an individual invitation for each person.
     [buddyJIDs enumerateObjectsUsingBlock:^(XMPPJID * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {

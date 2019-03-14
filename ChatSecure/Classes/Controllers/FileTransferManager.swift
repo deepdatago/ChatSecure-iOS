@@ -126,6 +126,7 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
     let callbackQueue = DispatchQueue.main
     let sessionManager: SessionManager
     var buddy: String
+    var isGroupChat: Bool
     private var servers: [HTTPServer] = []
     
     @objc public var canUploadFiles: Bool {
@@ -144,6 +145,7 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
         self.httpFileUpload = XMPPHTTPFileUpload()
         self.connection = connection
         self.buddy = "" // [CRYPTO_TALK] to save the buddy info stored in message
+        self.isGroupChat = false // [CRYPTO_TALK] to save whether it's group
         self.sessionManager = Alamofire.SessionManager(configuration: sessionConfiguration)
         super.init()
         if let stream = serverCapabilities.xmppStream {
@@ -282,11 +284,17 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
             
             // [CRYPTO_TALK] decrypt received inData using correct symmetric key
             let deepDatagoManager = DeepDatagoManager.sharedInstance()
-            let testKey = deepDatagoManager.getSymmetricKey(account: self.buddy as NSString)
+            var testKey: NSString
+            if (self.isGroupChat) {
+                testKey = deepDatagoManager.getGroupKey(group: self.buddy as NSString)
+            }
+            else {
+                testKey = deepDatagoManager.getSymmetricKey(account: self.buddy as NSString)
+            }
 
-            var encryptedData = CryptoManager.encryptDataWithSymmetricKey(key: testKey!, inputData: outData)!
+            var encryptedData = CryptoManager.encryptDataWithSymmetricKey(key: testKey, inputData: outData)!
             // if (testKey?.length == 0) {
-            encryptedData = outData
+            // encryptedData = outData
             // }
             self.httpFileUpload.requestSlot(fromService: service.jid, filename: filename, size: UInt(encryptedData.count), contentType: contentType, completion: { (slot: XMPPSlot?, iq: XMPPIQ?, error: Error?) in
                 guard let slot = slot else {
@@ -412,9 +420,16 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
     @objc public func send(image: UIImage, thread: OTRThreadOwner) {
         internalQueue.async {
             // [CRYPTO_TALK] to save buddy info for decryption purpose
+            self.isGroupChat = thread.isGroupThread
             let msgBuddy =  (thread as? OTRBuddy)
             if msgBuddy != nil && msgBuddy?.username != nil {
                 self.buddy = String(((msgBuddy?.username)?.split(separator: "@")[0])!)
+            }
+            if (msgBuddy == nil) {
+                let xmppRoom = (thread as? OTRXMPPRoom)
+                if (xmppRoom != nil && xmppRoom?.roomJID != nil) {
+                    self.buddy = String(((xmppRoom?.roomJID?.bare)?.split(separator: "@")[0])!)
+                }
             }
             // [CRYPTO_TALK] end
 
@@ -492,7 +507,6 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
         case .invalid, .plaintext, .plaintextWithOTR:
             shouldEncrypt = false
         }
-        
         self.upload(mediaItem: mediaItem, shouldEncrypt: shouldEncrypt, prefetchedData: prefetchedData, completion: { (_url: URL?, error: Error?) in
             guard let url = _url else {
                 if let error = error {
@@ -556,9 +570,17 @@ extension FileTransferManager {
     /** creates downloadmessages and then downloads if needed. parent message should already be saved! @warn Do not call from within an existing db transaction! */
     @objc public func createAndDownloadItemsIfNeeded(message: OTRMessageProtocol, force: Bool, transaction: YapDatabaseReadWriteTransaction) {
         // [CRYPTO_TALK] to save buddy info for decryption purpose
-        let msgBuddy =  message.buddy(with:transaction)
-        if msgBuddy != nil && msgBuddy?.bareJID != nil {
-            self.buddy = String((msgBuddy?.bareJID?.bare)!.split(separator: "@")[0])
+        if (message is OTRXMPPRoomMessage) {
+            let msg =  message as! OTRXMPPRoomMessage
+            self.buddy = String(((msg.roomJID!).split(separator: "@")[0]))
+            self.isGroupChat = true
+        }
+        else {
+            self.isGroupChat = false
+            let msgBuddy =  message.buddy(with:transaction)
+            if msgBuddy != nil && msgBuddy?.bareJID != nil {
+                self.buddy = String((msgBuddy?.bareJID?.bare)!.split(separator: "@")[0])
+            }
         }
         // [CRYPTO_TALK] end
         
@@ -571,6 +593,8 @@ extension FileTransferManager {
         if !force {
             downloads = message.existingDownloads(with: transaction)
             if let thread = message.threadOwner(with: transaction), let account = OTRAccount.fetchObject(withUniqueID: thread.threadAccountIdentifier, transaction: transaction) {
+                /*
+                // [CRYPTO_TALK] Disable this by default.  There is a problem for iOS created group, and an android user to send picture, and disableAutomaticURLFetching is set to true.
                 disableAutomaticURLFetching = account.disableAutomaticURLFetching
                 if !disableAutomaticURLFetching, let message = message as? OTRXMPPRoomMessage {
                     // For room messages, default to safe mode
@@ -580,6 +604,9 @@ extension FileTransferManager {
                         disableAutomaticURLFetching = false
                     }
                 }
+                // [CRYPTO_TALK] END Disable this by default.  There is a problem for iOS created group, and an android user to send picture, and disableAutomaticURLFetching is set to true.
+                */
+
             }
         }
         if downloads.count == 0 {
@@ -727,8 +754,14 @@ extension FileTransferManager {
         
         // [CRYPTO_TALK] decrypt received inData using correct symmetric key
         let deepDatagoManager = DeepDatagoManager.sharedInstance()
-        let testKey = deepDatagoManager.getSymmetricKey(account: self.buddy as NSString)
-        let decryptedData = CryptoManager.decryptDataWithSymmetricKey(key: testKey!, inputData: inData!)
+        var testKey : NSString
+        if (self.isGroupChat) {
+            testKey = deepDatagoManager.getGroupKey(group: self.buddy as NSString)
+        }
+        else {
+            testKey = deepDatagoManager.getSymmetricKey(account: self.buddy as NSString)
+        }
+        let decryptedData = CryptoManager.decryptDataWithSymmetricKey(key: testKey, inputData: inData!)
         // [CRYPTO_TALK] end
         
         guard var data = decryptedData, let response = urlResponse, let url = response.url else {

@@ -9,6 +9,7 @@
 import Foundation
 import YapDatabase
 import CocoaLumberjack
+import DeepDatago
 
 @objc public enum RoomMessageState:Int {
     case received = 0 // incoming messages only
@@ -510,6 +511,14 @@ public extension OTRXMPPRoomMessage {
 
 public extension XMPPRoom {
     @objc public func sendRoomMessage(_ message: OTRXMPPRoomMessage) {
+        // [CRYPTO_TALK] encrypt message for group
+        let origMessage = message.messageText
+        let deepDatagoManager = DeepDatagoManager.sharedInstance()
+        let groupKey = deepDatagoManager.getGroupKey(group: message.roomJID! as NSString)
+        let encryptedMessage = CryptoManager.encryptStringWithSymmetricKey(key: groupKey!, input: message.messageText! as NSString)
+        message.messageText = encryptedMessage! as String
+        // [CRYPTO_TALK] end of encrypt message for group
+
         let elementId = message.xmppId ?? message.uniqueId
         let body = XMLElement(name: "body", stringValue: message.messageText)
         let xmppMessage = XMPPMessage(messageType: nil, to: nil, elementID: elementId, child: body)
@@ -517,6 +526,8 @@ public extension XMPPRoom {
         let originId = message.originId ?? message.xmppId ?? message.uniqueId
         xmppMessage.addOriginId(originId)
         send(xmppMessage)
+        message.messageText = origMessage
+
     }
 }
 
