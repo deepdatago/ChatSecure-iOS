@@ -87,6 +87,7 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
     NSString *password = [[self.form formRowWithTag:kOTRXLFormPasswordTextFieldTag] value];
     NSString *nickName = [[self.form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
     DeepDatagoManager *deepDatagoManager = [DeepDatagoManager sharedInstance];
+    CryptoManager *cryptoManager = [CryptoManager sharedInstance];
     // NSString *post = [deepDatagoManager getRegisterRequestWithPassword:(password)];
     NSData *data = [deepDatagoManager registerRequestWithPassword:(password) nickName:nickName];
     if (data == nil) {
@@ -95,8 +96,7 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
 
     id responseJson = nil;
     responseJson = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-    NSLog(@"%@",[responseJson objectForKey:@"xmppAccountPassword"]);
-
+    NSLog(@"%@",[responseJson objectForKey:[deepDatagoManager getAccountPasswordTag]]);
     
     {
         /*
@@ -124,14 +124,14 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
         account = [OTRAccount accountWithUsername:@"" accountType:accountType];
         
         // NSString *nickname = [[self.form formRowWithTag:kOTRXLFormNicknameTextFieldTag] value];
-        NSString *aesKeyForAllFriends = [deepDatagoManager getPasswordForAllFriends];
-        NSString *encryptdNick = [CryptoManager encryptStringWithSymmetricKeyWithKey:aesKeyForAllFriends input:nickName];
+        NSString *aesKeyForAllFriends = [deepDatagoManager getSharedKeyForAllFriends];
+        NSString *encryptdNick = [cryptoManager encryptStringWithSymmetricKeyWithKey:aesKeyForAllFriends input:nickName];
 
-        NSString *jidNode = [responseJson objectForKey:@"xmppAccountNumber"]; // aka 'username' from username@example.com
+        NSString *jidNode = [responseJson objectForKey:[deepDatagoManager getAccountNumberTag]]; // aka 'username' from username@example.com
         NSString *jidDomain = [deepDatagoManager getDomain];
         account.rememberPassword = YES;
-        account.password = [responseJson objectForKey:@"xmppAccountPassword"];
-        self.tempPassword = [responseJson objectForKey:@"xmppAccountPassword"];
+        account.password = [responseJson objectForKey:[deepDatagoManager getAccountPasswordTag]];
+        self.tempPassword = [responseJson objectForKey:[deepDatagoManager getAccountPasswordTag]];
         account.autologin = YES;
         account.domain = [deepDatagoManager getDomain];
         account.port = 5222;

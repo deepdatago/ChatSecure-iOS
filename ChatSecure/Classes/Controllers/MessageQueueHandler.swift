@@ -559,9 +559,10 @@ extension MessageQueueHandler {
             // [CRYPTO_TALK] encrypt data by symmetric key
             let tmpAccount = buddyUsername.components(separatedBy: "@")[0]
             let deepDatagoManager = DeepDatagoManager.sharedInstance()
+            let cryptoManager = CryptoManager.sharedInstance()
             let testKey = deepDatagoManager.getSymmetricKey(account: tmpAccount as NSString)
 
-            let aesText = CryptoManager.encryptStringWithSymmetricKey(key: testKey!, input: text as NSString)
+            let aesText = cryptoManager.encryptStringWithSymmetricKey(key: testKey!, input: text as NSString)
             // NSLog("encrypted string: \((aesText!))")
             // [CRYPTO_TALK] end
             otrKit.encodeMessage(aesText! as String, tlvs: nil, username:buddyUsername , accountName: accountUsername, protocol: accountProtocolStrintg, tag: message)

@@ -284,6 +284,7 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
             
             // [CRYPTO_TALK] decrypt received inData using correct symmetric key
             let deepDatagoManager = DeepDatagoManager.sharedInstance()
+            let cryptoManager = CryptoManager.sharedInstance()
             var testKey: NSString
             if (self.isGroupChat) {
                 testKey = deepDatagoManager.getGroupKey(group: self.buddy as NSString)
@@ -292,7 +293,7 @@ public class FileTransferManager: NSObject, OTRServerCapabilitiesDelegate {
                 testKey = deepDatagoManager.getSymmetricKey(account: self.buddy as NSString)
             }
 
-            var encryptedData = CryptoManager.encryptDataWithSymmetricKey(key: testKey, inputData: outData)!
+            var encryptedData = cryptoManager.encryptDataWithSymmetricKey(key: testKey, inputData: outData)!
             // if (testKey?.length == 0) {
             // encryptedData = outData
             // }
@@ -754,6 +755,7 @@ extension FileTransferManager {
         
         // [CRYPTO_TALK] decrypt received inData using correct symmetric key
         let deepDatagoManager = DeepDatagoManager.sharedInstance()
+        let cryptoManager = CryptoManager.sharedInstance()
         var testKey : NSString
         if (self.isGroupChat) {
             testKey = deepDatagoManager.getGroupKey(group: self.buddy as NSString)
@@ -761,7 +763,7 @@ extension FileTransferManager {
         else {
             testKey = deepDatagoManager.getSymmetricKey(account: self.buddy as NSString)
         }
-        let decryptedData = CryptoManager.decryptDataWithSymmetricKey(key: testKey, inputData: inData!)
+        let decryptedData = cryptoManager.decryptDataWithSymmetricKey(key: testKey, inputData: inData!)
         // [CRYPTO_TALK] end
         
         guard var data = decryptedData, let response = urlResponse, let url = response.url else {

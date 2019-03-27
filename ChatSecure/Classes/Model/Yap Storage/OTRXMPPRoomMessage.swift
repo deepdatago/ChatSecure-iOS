@@ -514,8 +514,9 @@ public extension XMPPRoom {
         // [CRYPTO_TALK] encrypt message for group
         let origMessage = message.messageText
         let deepDatagoManager = DeepDatagoManager.sharedInstance()
+        let cryptoManager = CryptoManager.sharedInstance()
         let groupKey = deepDatagoManager.getGroupKey(group: message.roomJID! as NSString)
-        let encryptedMessage = CryptoManager.encryptStringWithSymmetricKey(key: groupKey!, input: message.messageText! as NSString)
+        let encryptedMessage = cryptoManager.encryptStringWithSymmetricKey(key: groupKey!, input: message.messageText! as NSString)
         message.messageText = encryptedMessage! as String
         // [CRYPTO_TALK] end of encrypt message for group
 

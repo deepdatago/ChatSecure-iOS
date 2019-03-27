@@ -69,6 +69,7 @@ const CGFloat OTRBuddyInfoCellHeight = 80.0;
     OTRBuddy *tmpBuddy = (OTRBuddy*)thread;
     NSString *tmpUserName = [tmpBuddy.username componentsSeparatedByString:@"@"][0];
     DeepDatagoManager* deepDatagoManager = [DeepDatagoManager sharedInstance];
+    CryptoManager* cryptoManager = [CryptoManager sharedInstance];
     NSString *tmpAllFriendsKey = [deepDatagoManager getAllFriendsKeyWithAccount:tmpUserName];
     if (tmpAllFriendsKey == nil || tmpAllFriendsKey.length == 0) {
         self.nameLabel.text = tmpUserName;
@@ -76,7 +77,7 @@ const CGFloat OTRBuddyInfoCellHeight = 80.0;
     else {
         NSString *decryptedNickName = [deepDatagoManager getDecryptedNickWithAccount:tmpUserName];
         if (decryptedNickName == nil || decryptedNickName.length == 0) {
-            decryptedNickName = [CryptoManager decryptStringWithSymmetricKeyWithKey:tmpAllFriendsKey base64Input:self.nameLabel.text];
+            decryptedNickName = [cryptoManager decryptStringWithSymmetricKeyWithKey:tmpAllFriendsKey base64Input:self.nameLabel.text];
         }
 
         if (decryptedNickName != nil && decryptedNickName.length > 0) {

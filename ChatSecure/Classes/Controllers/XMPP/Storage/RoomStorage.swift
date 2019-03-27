@@ -112,8 +112,9 @@ import DeepDatago
             }
             // [CRYPTO_TALK] get groupKey to decrypt message
             let deepDatagoManager = DeepDatagoManager.sharedInstance()
+            let cryptoManager = CryptoManager.sharedInstance()
             let groupKey = deepDatagoManager.getGroupKey(group: roomJID.bare as NSString)
-            let decryptedMessage = CryptoManager.decryptStringWithSymmetricKey(key: groupKey!, base64Input: message.messageText! as NSString)
+            let decryptedMessage = cryptoManager.decryptStringWithSymmetricKey(key: groupKey!, base64Input: message.messageText! as NSString)
             message.messageText = decryptedMessage! as String
             // [CRYPTO_TALK] END get groupKey to decrypt message
             message.originId = originId

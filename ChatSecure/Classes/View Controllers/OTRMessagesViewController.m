@@ -655,12 +655,13 @@ typedef NS_ENUM(int, OTRDropDownType) {
     if ([tmpBuddy isKindOfClass:[OTRXMPPBuddy class]]) {
         NSString *tmpUserName = [tmpBuddy.username componentsSeparatedByString:@"@"][0];
         DeepDatagoManager* deepDatagoManager = [DeepDatagoManager sharedInstance];
+        CryptoManager* cryptoManager = [CryptoManager sharedInstance];
         NSString *tmpAllFriendsKey = [deepDatagoManager getAllFriendsKeyWithAccount:tmpUserName];
         if (tmpAllFriendsKey == nil || tmpAllFriendsKey.length == 0) {
             titleView.titleLabel.text = tmpUserName;
         }
         else {
-            NSString *decryptedNickName = [CryptoManager decryptStringWithSymmetricKeyWithKey:tmpAllFriendsKey base64Input:titleView.titleLabel.text];
+            NSString *decryptedNickName = [cryptoManager decryptStringWithSymmetricKeyWithKey:tmpAllFriendsKey base64Input:titleView.titleLabel.text];
             if (decryptedNickName != nil && decryptedNickName.length > 0) {
                 titleView.titleLabel.text = decryptedNickName;
             }
