@@ -45,9 +45,13 @@ open class ShareController: NSObject {
             guard let url = url else {
                 return
             }
-            
+
             let qrCodeActivity = OTRQRCodeActivity()
-            let activityViewController = UIActivityViewController(activityItems: [self.getShareSource(account, url: url)], applicationActivities: [qrCodeActivity])
+            // [CRYPTO_TALK] use account.username in place of url for QR code
+            // let activityViewController = UIActivityViewController(activityItems: [self.getShareSource(account, url: url)], applicationActivities: [qrCodeActivity])
+            let activityViewController = UIActivityViewController(activityItems: [account.username], applicationActivities: [qrCodeActivity])
+            // [CRYPTO_TALK] END: use account.username in place of url for QR code
+
             activityViewController.excludedActivityTypes = [UIActivityType.print, UIActivityType.saveToCameraRoll, UIActivityType.addToReadingList]
             if let ppc = activityViewController.popoverPresentationController {
                 if let view = sender as? UIView {
