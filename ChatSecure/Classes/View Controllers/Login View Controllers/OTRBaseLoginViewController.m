@@ -456,6 +456,20 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
     if (!error) {
         return;
     }
+    
+    // [CRYPTO_TALK] by default, accept certificate from deepdatago.com
+    NSError* nsError = error;
+    NSString* hostname = nsError.userInfo[OTRXMPPSSLHostnameKey];
+    NSData* certData =nsError.userInfo[OTRXMPPSSLCertificateDataKey];
+    DeepDatagoManager* deepDataManager = DeepDatagoManager.sharedInstance;
+    if ([hostname isEqualToString:[deepDataManager getDomain]])
+    {
+        [OTRCertificatePinning addCertificateData:certData withHostName:hostname];
+        [self loginButtonPressed:self.view];
+    }
+    // [CRYPTO_TALK] END by default, accept certificate from deepdatago.com.  Comment out original alert logic below
+    
+    /*
     UIAlertController *certAlert = [UIAlertController certificateWarningAlertWithError:error saveHandler:^(UIAlertAction * _Nonnull action) {
         [self loginButtonPressed:self.view];
     }];
@@ -464,6 +478,7 @@ static NSUInteger kOTRMaxLoginAttempts = 5;
     } else {
         [self handleXMPPError:error];
     }
+     */
 }
 
 - (void)handleXMPPError:(NSError *)error

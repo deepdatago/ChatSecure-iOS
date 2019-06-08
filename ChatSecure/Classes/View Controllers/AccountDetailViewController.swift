@@ -9,6 +9,7 @@
 import UIKit
 import OTRAssets
 import PureLayout
+import DeepDatago
 
 struct DetailCellInfo {
     enum ActionType {
@@ -134,6 +135,21 @@ open class AccountDetailViewController: UIViewController, UITableViewDelegate, U
     private func loginStatusChanged() {
         tableView.reloadData()
         // Show certificate warnings
+        // [CRYPTO_TALK] manual login will auto accept the certificate
+        let lLastError = xmpp.lastConnectionError
+        if (lLastError != nil) {
+            let nsError = lLastError! as NSError
+            let hostname = nsError.userInfo[OTRXMPPSSLHostnameKey] as? String
+            let certData = nsError.userInfo[OTRXMPPSSLCertificateDataKey] as? Data
+            let deepDatagoManager = DeepDatagoManager.sharedInstance()
+            if (hostname == (deepDatagoManager.getDomain() as String)) {
+                OTRCertificatePinning.addCertificateData(certData!, withHostName: hostname!)
+                self.attemptLogin(self)
+                return
+            }
+        }
+        // [CRYPTO_TALK] END manual login will auto accept the certificate
+
         if let lastError = xmpp.lastConnectionError,
             let certWarning = UIAlertController.certificateWarningAlert(error: lastError, saveHandler: { action in
                 self.attemptLogin(action)
